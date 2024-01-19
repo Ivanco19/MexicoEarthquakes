@@ -81,21 +81,47 @@ d3.csv(rawDataURL).then((datos) => {
 
 });
 
+//_____________BARCHART_________________________
 
-// //________________________
+d3.csv(rawDataURL).then((datos) => {
+    // Crear un objeto para contar la cantidad de registros por estado
+    const conteoPorEstado = {};
 
-// //separar estados de la columna referencia de localizacion
+    // Extraer el estado de cada registro y contar la cantidad
+    datos.forEach((d) => {
+        const [comp, estado] = d['Referencia de localizacion'].split(', ');
+        const estados = estado.trim();
+        conteoPorEstado[estados] = (conteoPorEstado[estados] || 0) + 1;
+    });
 
-// d3.csv(rawDataURL).then((datos) => {
-//     datos.forEach((d) => {
-//         const [comp, estado] = d['Referencia de localizacion'].split(', ');
-//         const estados = estado;
+    // Convertir el objeto de conteo a un array de objetos
+    const datosParaGrafico = Object.entries(conteoPorEstado).map(([estado, cantidad]) => ({ estado, cantidad }));
 
-//         console.log(estados)}
+    console.log(datosParaGrafico);
 
+    // Ordenar los datos por cantidad descendente
+    datosParaGrafico.sort((a, b) => b.cantidad - a.cantidad);
 
-//         )});
+    // Configuración del gráfico de barras
+    var trace1 = {
+        type: "bar",
+        x: datosParaGrafico.map(d => d.estado),
+        y: datosParaGrafico.map(d => d.cantidad),
+        marker: { color: '#17BECF' }
+    };
 
-// //hacer count por estado
+    var data = [trace1];
 
-// //barplot
+    var layout = {
+        title: 'Quakes by State',
+        xaxis: {
+            title: 'States'
+        },
+        yaxis: {
+            title: 'Quakes'
+        }
+    };
+
+    Plotly.newPlot('barChart', data, layout);
+});
+
