@@ -1,5 +1,4 @@
-// URL del archivo CSV
-const csvUrl = '../Sismos_mexico_2023.csv';
+var csvUrl = '../Sismos_mexico_2023.csv';
 
 // Inicializar el mapa Leaflet
 let map = L.map("map", {
@@ -74,4 +73,3 @@ d3.csv(csvUrl).then((quakes) => {
     }
   });
 });
-

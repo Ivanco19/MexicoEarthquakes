@@ -1,29 +1,29 @@
+// Variable global para almacenar los datos originales
+let datos = [];
+
+// Variable global para almacenar los datos filtrados
+let datosFiltrados = [];
+
 var rawDataURL = '../Sismos_mexico_2023.csv';
 
-d3.csv(rawDataURL).then((datos) => {
-    // Convertir la columna de fecha a objetos de fecha
-    datos.forEach((d) => {
-        const [dia, mes, año] = d.Fecha.split('/');
-        const fechaFormatoCorrecto = `${año}/${mes}/${dia}`;
-        d.Fecha = new Date(fechaFormatoCorrecto);
-        d.Magnitud = parseFloat(d.Magnitud);
-    });
+function filtrarPorCuarto(datos, cuarto) {
+    switch (cuarto) {
+        case 'Q1':
+            return datos.filter((d) => d.Fecha.getMonth() >= 0 && d.Fecha.getMonth() <= 2);
+        case 'Q2':
+            return datos.filter((d) => d.Fecha.getMonth() >= 3 && d.Fecha.getMonth() <= 5);
+        case 'Q3':
+            return datos.filter((d) => d.Fecha.getMonth() >= 6 && d.Fecha.getMonth() <= 8);
+        case 'Q4':
+            return datos.filter((d) => d.Fecha.getMonth() >= 9 && d.Fecha.getMonth() <= 11);
+        case '2023':
+            return datos.filter((d) => d.Fecha.getMonth() >= 0 && d.Fecha.getMonth() <= 11);
+        default:
+            return datos;
+    }
+}
 
-    // Agrupar los datos por mes y obtener la magnitud máxima para cada mes
-    const eventosMaximosDiarios = d3.rollups(
-        datos,
-        (v) => d3.max(v, (d) => d.Magnitud),
-        (d) => d3.timeDay(d.Fecha)
-    );
-
-    // Convertir los resultados a un array de objetos
-    const fechas = eventosMaximosDiarios.map(d => d[0]);
-    const magnitudes = eventosMaximosDiarios.map(d => d[1]);
-
-    const resultados = Array.from(eventosMaximosDiarios, ([fechas, magnitudes]) => ({ fechas, magnitudes }));
-
-    console.log(resultados)
-    
+function timeSeriesChart(fechas, magnitudes){
     // Configuración del gráfico
     var trace1 = {
         type: "scatter",
@@ -31,13 +31,12 @@ d3.csv(rawDataURL).then((datos) => {
         name: 'Magnitud Máxima',
         x: fechas,
         y: magnitudes,
-        line: { color: '#17BECF' }
+        line: { color: '#fd7e14' }
     };
 
-    var data = [trace1];
+    var data1 = [trace1];
 
-    var layout = {
-        title: 'MAX MAGNITUDE BY DAY',
+    var layout1 = {
         xaxis: {
             autorange: true,
             range: [fechas[0].toISOString(), fechas[fechas.length - 1].toISOString()],
@@ -50,14 +49,8 @@ d3.csv(rawDataURL).then((datos) => {
                         stepmode: 'backward'
                     },
                     {
-                        count: 3,
-                        label: '3m',
-                        step: 'month',
-                        stepmode: 'backward'
-                    },
-                    {
-                        count: 6,
-                        label: '6m',
+                        count: 2,
+                        label: '2m',
                         step: 'month',
                         stepmode: 'backward'
                     },
@@ -73,55 +66,138 @@ d3.csv(rawDataURL).then((datos) => {
             autorange: true,
             range: [0, d3.max(magnitudes)],
             type: 'linear'
-        }
+        },
+        height: 500,
+        margin: {"t": 0, "b": 50, "l": 60, "r": 60}
     };
     
+    Plotly.newPlot('graph', data1, layout1);
+}
 
-    Plotly.newPlot('graph', data, layout);
+function barChart(datosParaGrafico){
+    var trace2 = {
+        type: "bar",
+        x: datosParaGrafico.map(d => d.cantidad),
+        y: datosParaGrafico.map(d => d.estado),
+        marker: { color: '#0d6efd' },
+        orientation: 'h'
+    };
 
-});
+    var data2 = [trace2];
 
-//_____________BARCHART_________________________
+    var layout2 = { 
+        yaxis: {
+            title: 'States'
+        },
+        height: 400,
+        width: 400,
+        margin: {"t": 10, "b": 50, "l": 80, "r": 0}
+    };
 
-d3.csv(rawDataURL).then((datos) => {
-    // Crear un objeto para contar la cantidad de registros por estado
-    const conteoPorEstado = {};
+    Plotly.newPlot('barChart', data2, layout2);
+}
 
-    // Extraer el estado de cada registro y contar la cantidad
-    datos.forEach((d) => {
-        const [comp, estado] = d['Referencia de localizacion'].split(', ');
-        const estados = estado.trim();
-        conteoPorEstado[estados] = (conteoPorEstado[estados] || 0) + 1;
+function pieChart(months, quakes){
+    var data3 = [{
+        type: "pie",
+        values: quakes,
+        labels: months,
+        textinfo: "label+percent",
+        textposition: "outside"
+      }]
+      
+      var layout3 = {
+        height: 400,
+        width: 400,
+        margin: {"t": 10, "b": 50, "l": 50, "r": 80},
+        showlegend: false
+        }
+      
+      Plotly.newPlot('pieChart', data3, layout3)
+}
+
+function updateTable(magnitudes, datosParaGrafico){
+    let minEarthquake = magnitudes.sort((a, b) => a - b)[0]
+    d3.select('#minEarthquake').text(minEarthquake)
+    let maxEarthquake = magnitudes.sort((a, b) => b - a)[0]
+    d3.select('#maxEarthquake').text(maxEarthquake)
+    let numeroFilas = datosFiltrados.length
+    d3.select('#totalSismos').text(numeroFilas)
+    let estado = datosParaGrafico[9].estado
+    d3.select('#estado').text(estado) 
+}
+
+function cargarDatos(){
+
+    // Agrupar los datos por mes y obtener la magnitud máxima para cada mes
+    const eventosMaximosDiarios = d3.rollups(
+        datosFiltrados,
+        (v) => d3.max(v, (d) => d.Magnitud),
+        (d) => d3.timeDay(d.Fecha)
+    );
+
+    // Convertir los resultados a un array de objetos
+    const resultados = eventosMaximosDiarios.map(([fecha, magnitud]) => ({ fecha, magnitud }));
+    const fechas = resultados.map(d => d.fecha);
+    const magnitudes = resultados.map(d => d.magnitud);
+
+    timeSeriesChart(fechas, magnitudes)
+    
+    // Crear un objeto para contar la cantidad de sismos por ciudad
+    const conteoPorCiudad = {};
+
+    // Iterar sobre los datos y contar la cantidad de sismos por ciudad
+    datosFiltrados.forEach((d) => {
+        const estado = d.estado;
+        conteoPorCiudad[estado] = (conteoPorCiudad[estado] || 0) + 1;
     });
 
     // Convertir el objeto de conteo a un array de objetos
-    const datosParaGrafico = Object.entries(conteoPorEstado).map(([estado, cantidad]) => ({ estado, cantidad }));
-
-    console.log(datosParaGrafico);
+    const datosGraficoCiudades = Object.entries(conteoPorCiudad).map(([estado, cantidad]) => ({ estado, cantidad }));
 
     // Ordenar los datos por cantidad descendente
-    datosParaGrafico.sort((a, b) => b.cantidad - a.cantidad);
+    const datosParaGrafico = datosGraficoCiudades.slice(0,10).sort((a, b) => a.cantidad - b.cantidad);
 
-    // Configuración del gráfico de barras
-    var trace1 = {
-        type: "bar",
-        x: datosParaGrafico.map(d => d.estado),
-        y: datosParaGrafico.map(d => d.cantidad),
-        marker: { color: '#17BECF' }
-    };
+    barChart(datosParaGrafico) 
 
-    var data = [trace1];
+    // Obtener el total de eventos por mes
+    const totalEventosPorMes = d3.rollups(
+        datosFiltrados,
+        (v) => v.length,
+        (d) => d3.timeMonth(d.Fecha)
+    );
 
-    var layout = {
-        title: 'Quakes by State',
-        xaxis: {
-            title: 'States'
-        },
-        yaxis: {
-            title: 'Quakes'
-        }
-    };
+    // Convertir los resultados a un array de objetos
+    const quakes_month = Array.from(totalEventosPorMes, ([meses, sismos]) => ({
+        meses: d3.timeFormat('%b')(meses), sismos }));
+    const months = quakes_month.map(d => d.meses)
+    const quakes = quakes_month.map(d => d.sismos)
+    
+    pieChart(months, quakes)
 
-    Plotly.newPlot('barChart', data, layout);
+    updateTable(magnitudes, datosParaGrafico)
+}
+
+function actualizarDatos(){
+    // Filtrar los datos según el cuarto de año seleccionado
+    const cuartoSeleccionado = document.getElementById('quarterDropdown').value;
+    datosFiltrados = filtrarPorCuarto(datos, cuartoSeleccionado);
+    cargarDatos()
+}
+
+d3.csv(rawDataURL).then((data) => {
+    datos = data;
+    // Convertir la columna de fecha a objetos de fecha
+    datos.forEach((d) => {
+        const [dia, mes, año] = d.Fecha.split('/');
+        const fechaFormatoCorrecto = `${mes}/${dia}/${año}`;
+        d.Fecha = new Date(fechaFormatoCorrecto);
+        d.Magnitud = parseFloat(d.Magnitud);
+        
+        // Extraer la ciudad de la columna de ubicación
+        const [, ciudad] = d['Referencia de localizacion'].split(', ');
+        const estado = ciudad.trim();
+        d.estado = estado
+    });
+    actualizarDatos();
 });
-
