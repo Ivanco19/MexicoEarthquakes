@@ -1,44 +1,45 @@
-// Variable global para almacenar los datos originales
-let datos = [];
+// Global variable to store all original data
+let datos = []
 
-// Variable global para almacenar los datos filtrados
-let datosFiltrados = [];
+// Global variable to store filtered data
+let datosFiltrados = []
 
-var rawDataURL = '../Sismos_mexico_2023.csv';
+// Read CSV file
+var rawDataURL = '../Sismos_mexico_2023.csv'
 
-function filtrarPorCuarto(datos, cuarto) {
+// This function filters data according to user selection
+function dinamicFilter(datos, cuarto) {
     switch (cuarto) {
         case 'Q1':
-            return datos.filter((d) => d.Fecha.getMonth() >= 0 && d.Fecha.getMonth() <= 2);
+            return datos.filter((d) => d.Fecha.getMonth() >= 0 && d.Fecha.getMonth() <= 2)
         case 'Q2':
-            return datos.filter((d) => d.Fecha.getMonth() >= 3 && d.Fecha.getMonth() <= 5);
+            return datos.filter((d) => d.Fecha.getMonth() >= 3 && d.Fecha.getMonth() <= 5)
         case 'Q3':
-            return datos.filter((d) => d.Fecha.getMonth() >= 6 && d.Fecha.getMonth() <= 8);
+            return datos.filter((d) => d.Fecha.getMonth() >= 6 && d.Fecha.getMonth() <= 8)
         case 'Q4':
-            return datos.filter((d) => d.Fecha.getMonth() >= 9 && d.Fecha.getMonth() <= 11);
-        case '2023':
-            return datos.filter((d) => d.Fecha.getMonth() >= 0 && d.Fecha.getMonth() <= 11);
+            return datos.filter((d) => d.Fecha.getMonth() >= 9 && d.Fecha.getMonth() <= 11)
         default:
-            return datos;
+            return datos
     }
 }
 
+// This function plots a time series chart with earthquake historical data
 function timeSeriesChart(fechas, magnitudes){
-    // Configuración del gráfico
+    // Chart set up
     var trace1 = {
         type: "scatter",
         mode: "lines",
-        name: 'Magnitud Máxima',
         x: fechas,
         y: magnitudes,
         line: { color: '#fd7e14' }
-    };
+    }
 
-    var data1 = [trace1];
+    var data1 = [trace1]
 
     var layout1 = {
         xaxis: {
             autorange: true,
+            // Transforms date format to MM/DD/AAAA
             range: [fechas[0].toISOString(), fechas[fechas.length - 1].toISOString()],
             rangeselector: {
                 buttons: [
@@ -68,20 +69,25 @@ function timeSeriesChart(fechas, magnitudes){
             type: 'linear'
         },
         height: 500,
+        plot_bgcolor: '#e9ecef',
+        paper_bgcolor: '#e9ecef',
         margin: {"t": 0, "b": 50, "l": 60, "r": 60}
-    };
+    }
     
-    Plotly.newPlot('graph', data1, layout1);
+    // Creates the new plot using data1 and layout1 settings
+    Plotly.newPlot('graph', data1, layout1)
 }
 
-function barChart(datosParaGrafico){
+// This function creates a bar chart earthquakes by state
+function barChart(quake_quantity, state){
+    // Chart set up
     var trace2 = {
         type: "bar",
-        x: datosParaGrafico.map(d => d.cantidad),
-        y: datosParaGrafico.map(d => d.estado),
+        x: quake_quantity,
+        y: state,
         marker: { color: '#0d6efd' },
         orientation: 'h'
-    };
+    }
 
     var data2 = [trace2];
 
@@ -89,15 +95,20 @@ function barChart(datosParaGrafico){
         yaxis: {
             title: 'States'
         },
+        plot_bgcolor: '#e9ecef',
+        paper_bgcolor: '#e9ecef',
         height: 400,
-        width: 400,
-        margin: {"t": 10, "b": 50, "l": 80, "r": 0}
-    };
+        width: 420,
+        margin: {"t": 10, "b": 30, "l": 80, "r": 0}
+    }
 
-    Plotly.newPlot('barChart', data2, layout2);
+    // Creates the new plot using data2 and layout2 settings
+    Plotly.newPlot('barChart', data2, layout2)
 }
 
+// This function creates a pie chart earthquakes by month
 function pieChart(months, quakes){
+    // Chart set up
     var data3 = [{
         type: "pie",
         values: quakes,
@@ -107,97 +118,139 @@ function pieChart(months, quakes){
       }]
       
       var layout3 = {
+        paper_bgcolor: '#e9ecef',
         height: 400,
-        width: 400,
-        margin: {"t": 10, "b": 50, "l": 50, "r": 80},
+        width: 430,
+        margin: {"t": 20, "b": 30, "l": 60, "r": 50},
         showlegend: false
         }
       
-      Plotly.newPlot('pieChart', data3, layout3)
+    // Creates the new plot using data3 and layout3 settings
+    Plotly.newPlot('pieChart', data3, layout3)
 }
 
-function updateTable(magnitudes, datosParaGrafico){
-    let minEarthquake = magnitudes.sort((a, b) => a - b)[0]
-    d3.select('#minEarthquake').text(minEarthquake)
-    let maxEarthquake = magnitudes.sort((a, b) => b - a)[0]
-    d3.select('#maxEarthquake').text(maxEarthquake)
-    let numeroFilas = datosFiltrados.length
-    d3.select('#totalSismos').text(numeroFilas)
-    let estado = datosParaGrafico[9].estado
-    d3.select('#estado').text(estado) 
+// This function updates summary table with relevant information
+function updateTable(magnitudes, state, quake_quantity){
+    // Calculate number of earthquakes and shows in html table
+    let numberQuakes = datosFiltrados.length
+    d3.select('#totalSismos').text(numberQuakes)
+
+    // Calculate the most seismic state and shows in html table
+    let lastIndex = state.length - 1;
+    let seismicState = state[lastIndex]
+    d3.select('#estado').text(`${seismicState} - ${quake_quantity[lastIndex]}`) 
+
+    // Calculate max earthquake magnitude and shows in html table
+    let maxEarthquakeMagnitude = magnitudes.sort((a, b) => b - a)[0]
+    d3.select('#maxEarthquake').text(maxEarthquakeMagnitude)
+
+    // Find the max earthquake magnitude and get its info (location, date, time)
+    var maxEarthquake = datosFiltrados.filter(function(objeto) {
+        return objeto.Magnitud === maxEarthquakeMagnitude;
+    });
+        // Date
+    let date = d3.timeFormat('%b %d')(maxEarthquake[0].Fecha)
+    d3.select('#date').text(date)
+        // Location
+    let location = maxEarthquake[0].estado
+    d3.select('#location').text(location)
+        // Time
+    let time = maxEarthquake[0].Hora
+    d3.select('#time').text(time)
 }
 
+// This function prepares data for visualization
 function cargarDatos(){
 
-    // Agrupar los datos por mes y obtener la magnitud máxima para cada mes
+    // 1. DATA PREPARATION FOR TIME SERIES VISUALIZATION
+    // Groups earthquake magnitudes by day and gets maximum event
     const eventosMaximosDiarios = d3.rollups(
         datosFiltrados,
         (v) => d3.max(v, (d) => d.Magnitud),
         (d) => d3.timeDay(d.Fecha)
-    );
+    )
 
-    // Convertir los resultados a un array de objetos
-    const resultados = eventosMaximosDiarios.map(([fecha, magnitud]) => ({ fecha, magnitud }));
-    const fechas = resultados.map(d => d.fecha);
-    const magnitudes = resultados.map(d => d.magnitud);
+    // Transform results to an array of objects
+    const resultados = eventosMaximosDiarios.map(([fecha, magnitud]) => ({ fecha, magnitud }))
+    const fechas = resultados.map(d => d.fecha)
+    const magnitudes = resultados.map(d => d.magnitud)
 
+    // Plot a time series chart using magnitudes and dates
     timeSeriesChart(fechas, magnitudes)
     
-    // Crear un objeto para contar la cantidad de sismos por ciudad
-    const conteoPorCiudad = {};
+    // 2. DATA PREPARATION FOR BAR CHART VISUALIZATION
+    // Create an object to count quakes by city/state
+    const conteoPorCiudad = {}
 
-    // Iterar sobre los datos y contar la cantidad de sismos por ciudad
+    // Iterate through all data and counts quakes by state
     datosFiltrados.forEach((d) => {
-        const estado = d.estado;
-        conteoPorCiudad[estado] = (conteoPorCiudad[estado] || 0) + 1;
-    });
+        const estado = d.estado
+        conteoPorCiudad[estado] = (conteoPorCiudad[estado] || 0) + 1
+    })
 
-    // Convertir el objeto de conteo a un array de objetos
-    const datosGraficoCiudades = Object.entries(conteoPorCiudad).map(([estado, cantidad]) => ({ estado, cantidad }));
+    // Transform results to an array of objects
+    const datosGraficoCiudades = Object.entries(conteoPorCiudad).map(([estado, cantidad]) => ({ estado, cantidad }))
+    
+    // Sort the results and just get the top 10
+    const datosParaGrafico = datosGraficoCiudades.slice(0,10).sort((a, b) => a.cantidad - b.cantidad)
+    const quake_quantity = datosParaGrafico.map(d => d.cantidad)
+    const state = datosParaGrafico.map(d => d.estado)
 
-    // Ordenar los datos por cantidad descendente
-    const datosParaGrafico = datosGraficoCiudades.slice(0,10).sort((a, b) => a.cantidad - b.cantidad);
+    // Plot a bar chart using quantity of quakes per city
+    barChart(quake_quantity, state) 
 
-    barChart(datosParaGrafico) 
-
-    // Obtener el total de eventos por mes
+    // 3. DATA PREPARATION FOR PIE CHART VISUALIZATION
+    // Groups number of earthquakes by month
     const totalEventosPorMes = d3.rollups(
         datosFiltrados,
         (v) => v.length,
         (d) => d3.timeMonth(d.Fecha)
-    );
+    )
 
-    // Convertir los resultados a un array de objetos
+    // Transform results to an array of objects
     const quakes_month = Array.from(totalEventosPorMes, ([meses, sismos]) => ({
-        meses: d3.timeFormat('%b')(meses), sismos }));
+        meses: d3.timeFormat('%b')(meses), 
+        sismos 
+    }))
     const months = quakes_month.map(d => d.meses)
     const quakes = quakes_month.map(d => d.sismos)
     
+    // Plot a pie chart using earthquakes per month
     pieChart(months, quakes)
 
-    updateTable(magnitudes, datosParaGrafico)
+    // Update html summary table according to user filter
+    updateTable(magnitudes, state, quake_quantity)
 }
 
+// This function filters data according to user selection
 function actualizarDatos(){
-    // Filtrar los datos según el cuarto de año seleccionado
-    const cuartoSeleccionado = document.getElementById('quarterDropdown').value;
-    datosFiltrados = filtrarPorCuarto(datos, cuartoSeleccionado);
+    
+    const cuartoSeleccionado = document.getElementById('userSelection').value
+    datosFiltrados = dinamicFilter(datos, cuartoSeleccionado)
+    
+    // Because its a dinamic visualization we need to build new plots
     cargarDatos()
 }
 
+// Read csv file using D3
 d3.csv(rawDataURL).then((data) => {
-    datos = data;
-    // Convertir la columna de fecha a objetos de fecha
+    
+    // assign data from csv file to a variable so we can make it global
+    datos = data
+    
+    // Transform date column to a new date object. Parse magnitude info to float type
     datos.forEach((d) => {
-        const [dia, mes, año] = d.Fecha.split('/');
-        const fechaFormatoCorrecto = `${mes}/${dia}/${año}`;
-        d.Fecha = new Date(fechaFormatoCorrecto);
-        d.Magnitud = parseFloat(d.Magnitud);
+        const [dia, mes, año] = d.Fecha.split('/')
+        const fechaFormatoCorrecto = `${mes}/${dia}/${año}`
+        d.Fecha = new Date(fechaFormatoCorrecto)
+        d.Magnitud = parseFloat(d.Magnitud)
         
-        // Extraer la ciudad de la columna de ubicación
-        const [, ciudad] = d['Referencia de localizacion'].split(', ');
-        const estado = ciudad.trim();
+        // Extract state from 'Referencia de localizacion' column
+        const [, ciudad] = d['Referencia de localizacion'].split(', ')
+        const estado = ciudad.trim()
         d.estado = estado
-    });
-    actualizarDatos();
+    })
+
+    //Initialize plots visualizations
+    actualizarDatos()
 });
