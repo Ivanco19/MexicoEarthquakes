@@ -31,7 +31,7 @@ function timeSeriesChart(fechas, magnitudes){
         mode: "lines",
         x: fechas,
         y: magnitudes,
-        line: { color: '#fd7e14' }
+        line: { color: '#0d6efd' }
     }
 
     var data1 = [trace1]
@@ -98,7 +98,7 @@ function barChart(quake_quantity, state){
         plot_bgcolor: '#e9ecef',
         paper_bgcolor: '#e9ecef',
         height: 400,
-        width: 420,
+        width: 400,
         margin: {"t": 10, "b": 30, "l": 80, "r": 0}
     }
 
@@ -120,8 +120,8 @@ function pieChart(months, quakes){
       var layout3 = {
         paper_bgcolor: '#e9ecef',
         height: 400,
-        width: 430,
-        margin: {"t": 20, "b": 30, "l": 60, "r": 50},
+        width: 420,
+        margin: {"t": 20, "b": 30, "l": 60, "r": 40},
         showlegend: false
         }
       

@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mexico Earthquakes 2023</title>
 
+    <!-- Our CSS -->
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+
     <!--Plotly libraries-->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     
@@ -16,16 +19,20 @@
 
 <body style="background-color: #e9ecef">
 
-    <!--Navbar menu-->
-    <nav class="navbar bg-primary" data-bs-theme="dark">
-        <a href="map.html" class="btn btn-primary ms-3" id="liveToastBtn">Go to map</a>
-    </nav>
+    <!--Main title-->
+    <div class="container-fluid bg-dark">
+      <div id="main" class="row">
+        <div class="col-md-12 text-white text-center" id="titulo">
+          <p class="fs-1 text-center fw-bold mb-4">Earthquakes in Mexico 2023</p>
+          <p class="fs-5 fw-light text-center">Use the interactive charts below to explore the seismic activity in Mexico during the year 2023 <br>
+          Or explore an interactive map that shows the exact location of each seismic event.</p>
+          <a href="map.html" class="btn btn-primary mt-5" id="liveToastBtn">Go to map</a>
+        </div>
+      </div>   
+    </div> 
 
-    <!--Main title-->    
-    <p class="fs-1 text-center fw-bold">Earthquakes in Mexico 2023</p>
-
-    <div class="container">
-      <!--This first row host table, bar chart and pie chart-->
+    <!--This container host table, bar chart and pie chart-->
+    <div class="container mt-4">
       <div class="row">
         <div class="col-3">
           <!--This is a summary table with relevant information-->
@@ -41,7 +48,7 @@
                   <option class='bg-dark p-2 text-white' value="Q4">Q4 (Oct - Dec)</option> 
                 </select>
               <tr>
-                <td class="fw-semibold">Number of Earthquakes: </td>
+                <td class="fw-semibold"># Earthquakes:</td>
                 <td id="totalSismos"></td>
               </tr>
               <tr>
@@ -79,12 +86,12 @@
       <!--This second row host time series chart-->
       <div class="row">
         <div class="col-12">
-          <br><br><p class="fs-4 fw-bold text-center">Max earthquake magnitude by day (Historical)</p>
+          <br><br><p class="fs-4 fw-bold text-center">Max earthquake magnitude (Historical)</p>
           <div id="graph"></div>
         </div>
       </div>
-    </div>
-    
+    </div> 
+
     <!--D3 Libraries-->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     
@@ -93,5 +100,6 @@
     
     <!--Bootstrap libraries-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    </body>
+  
+</body>
 </html>
