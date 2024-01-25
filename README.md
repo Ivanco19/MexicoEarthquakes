@@ -1,6 +1,6 @@
 # MexicoEarthquakes
 
-This is project three for Data analysis boot camp on Tec de Monterrey and EdEx. This project is made to help visualize the ammout and intencity of earthquakes in mexico that occured in 2023. these datapoints are represented in a map of mexico, a bargraph that is segmented by states and a linegraph that allows you to vixzualize the magnitude of earthquakes during the year.
+This serves as the third project within the Data Analysis Boot Camp at Tec de Monterrey and EdEx. The primary objective of this project is to facilitate a comprehensive visualization of both the quantity and intensity of earthquakes that transpired in Mexico during the year 2023. These data points are depicted through a geographical map of Mexico, a segmented bar graph providing insights at the state level, and a dynamic line graph enabling users to visualize the magnitude of earthquakes throughout the year. Only events with a magnitude of 4.0 or greater were taken into consideration due to the ammount of datapoints and to facilitate the visualization to the user.
 
 ## Instructions of use:
 To use this project, the user must simply ensure that the CSV is properly linked to the index.html File. To visualize the compleated project, two options are avalable:
