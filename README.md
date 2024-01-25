@@ -19,7 +19,7 @@ http://www.ssn.unam.mx/sismicidad/resumen-mensual/#:~:text=Durante%20el%20mes%20
 
 ## Refrences for used code:
 This project includes code from the following sources.
-Bootstrap
-D3
-Plotly
+ - Bootstrap
+ - D3
+ - Plotly
 The majority of the code from these sources is exclusively for the building and formating of the graphs.
